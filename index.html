@@ -160,20 +160,30 @@
      */
     async function fetchData(action) {
         try {
-            // CLAVE: El parámetro 'action' se adjunta aquí a la URL del Apps Script.
             const url = `${WEB_APP_URL}?action=${action}`; 
             
+            console.log(`[CLIENTE] Llamando a: ${url}`); // Registro de la URL que se usa
+
             const response = await fetch(url);
             
+            // Registro de la respuesta HTTP
+            console.log(`[CLIENTE] Respuesta HTTP recibida: ${response.status} - OK: ${response.ok}`);
+
             if (!response.ok) {
+                // Si el error no es 200, lanzamos la excepción
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            // El Apps Script siempre devuelve JSON
-            return await response.json(); 
+            // Convertir la respuesta a JSON
+            const data = await response.json(); 
+            
+            // Registro de los datos JSON recibidos
+            console.log(`[CLIENTE] Datos recibidos de ${action}:`, data);
+            
+            return data; 
             
         } catch (error) {
-            console.error(`Error en fetchData para acción ${action}:`, error);
+            console.error(`[CLIENTE] Error en fetchData para acción ${action}:`, error);
             return { success: false, message: 'Error de red o servidor: ' + error.message };
         }
     }
