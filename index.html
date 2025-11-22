@@ -138,6 +138,7 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw6noiXFiMbctGbB99rW_1dlMsK7-0vMwUDRHUgvhzL3bWipdLz5-YkeluvoznpSGok/exec'; 
     const form = document.getElementById('reporteForm');
     const statusMessage = document.getElementById('statusMessage');
+    let CLIENTE_CARPETA_ID = null;
 
     // --- FUNCIONES DE UTILIDAD ---
 
@@ -175,22 +176,55 @@
     // --- FUNCIONES DE CARGA (GET) ---
 
     async function cargarEstablecimientos() {
-        const select = document.getElementById('idEstablecimiento');
-        select.innerHTML = '<option value="" disabled selected>Cargando...</option>'; // Limpiar y poner cargando
+        // 1. Obtener el selector del HTML
+        const selector = document.getElementById('idEstablecimiento');
+        
+        selector.innerHTML = '<option value="" disabled selected>Cargando ...</option>'; 
 
-        const result = await fetchData('getEstablecimientos');
-        
-        select.innerHTML = ''; // Limpiar después de la carga
-        
+        // 2. Obtener los datos del Apps Script (incluye el ID_Carpeta_Drive gracias a la modificación en Code.gs)
+        const result = await fetchData('getEstablecimientos'); 
+
+        selector.innerHTML = ''; // Limpiar después de la carga
+
         if (result.success && result.data && result.data.length > 0) {
-            select.appendChild(new Option('Seleccione un establecimiento...', ''));
-            result.data.forEach(est => {
+            
+            // 3. Almacenar los datos de los clientes para el evento 'change'
+            const establecimientos = result.data; 
+            
+            // Añadir opción por defecto
+            selector.appendChild(new Option('Seleccione un establecimiento...', '', '', true));
+            
+            // Rellenar el selector con los datos
+            establecimientos.forEach(est => {
+                // Se usa est.ID_Establecimiento como value, y el texto combinado como label
                 const option = new Option(`${est.Denominacion} (${est.Direccion})`, est.ID_Establecimiento);
-                select.appendChild(option);
+                selector.appendChild(option);
             });
-            select.selectedIndex = 0; // Seleccionar la opción de placeholder
+
+            // 4. Agregar el Escuchador de Eventos (CLAVE: Aquí se guarda el ID de Carpeta)
+            selector.addEventListener('change', (event) => {
+                const selectedId = event.target.value;
+                
+                // Buscar el objeto completo que incluye ID_Carpeta_Drive
+                const clienteSeleccionado = establecimientos.find(e => e.ID_Establecimiento === selectedId);
+                
+                if (clienteSeleccionado) {
+                    // GUARDAR EL ID DE CARPETA en la variable global
+                    CLIENTE_CARPETA_ID = clienteSeleccionado.ID_Carpeta_Drive; 
+                    
+                    // Opcional: Mostrar Denominación y Dirección
+                    // Si tienes campos con estos IDs en tu HTML, se actualizarán aquí.
+                    // document.getElementById('denominacion_mostrar').value = clienteSeleccionado.Denominacion;
+                    // document.getElementById('direccion_mostrar').value = clienteSeleccionado.Direccion;
+                } else {
+                    CLIENTE_CARPETA_ID = null;
+                }
+                // Puedes descomentar para depurar: console.log("ID de Carpeta Guardado:", CLIENTE_CARPETA_ID); 
+            });
+            
         } else {
-            select.innerHTML = '<option value="" disabled selected>No se encontraron establecimientos.</option>';
+            selector.innerHTML = '<option value="" disabled selected>No se encontraron establecimientos.</option>';
+            console.error("Error al cargar datos (getEstablecimientos). Verifique la URL y el despliegue.");
         }
     }
 
@@ -245,6 +279,8 @@
             "Observaciones y recomendaciones realizadas": document.getElementById('observaciones').value,
             "actividades": actividadesSeleccionadas // Array de IDs de las actividades marcadas
         };
+
+        "ID_Carpeta_Drive": CLIENTE_CARPETA_ID
 
         try {
             // 3. Petición POST
