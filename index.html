@@ -159,17 +159,22 @@
      * @returns {Promise<Object>} El objeto de respuesta JSON.
      */
     async function fetchData(action) {
-        const url = `${WEB_APP_URL}?action=${action}`;
         try {
+            // CLAVE: El parámetro 'action' se adjunta aquí a la URL del Apps Script.
+            const url = `${WEB_APP_URL}?action=${action}`; 
+            
             const response = await fetch(url);
+            
             if (!response.ok) {
-                throw new Error(`Error de red: ${response.status}`);
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            return await response.json();
+            
+            // El Apps Script siempre devuelve JSON
+            return await response.json(); 
+            
         } catch (error) {
-            console.error(`Error al obtener ${action}:`, error);
-            showStatus(`Error al cargar datos (${action}). Verifique la URL y el despliegue.`, false);
-            throw error; // Propagar el error para detener el flujo de carga
+            console.error(`Error en fetchData para acción ${action}:`, error);
+            return { success: false, message: 'Error de red o servidor: ' + error.message };
         }
     }
 
