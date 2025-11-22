@@ -288,14 +288,16 @@
         // 2. Construcción del JSON
         const datosDelReporte = {
             "Fecha de Visita": document.getElementById('fechaVisita').value,
-            "ID_Establecimiento": parseInt(document.getElementById('idEstablecimiento').value), // Asegurar que sea número
+            "ID_Establecimiento": parseInt(document.getElementById('idEstablecimiento').value),
             "ID_Profesional": document.getElementById('idProfesional').value,
             "Otras tareas realizadas": document.getElementById('otrasTareas').value,
             "Observaciones y recomendaciones realizadas": document.getElementById('observaciones').value,
-            "actividades": actividadesSeleccionadas // Array de IDs de las actividades marcadas
+            "actividades": actividadesSeleccionadas, // Array de IDs de las actividades marcadas
+            // CLAVE CORREGIDA: Agregamos ID_Carpeta_Drive dentro del objeto y sin comillas extra.
+            "ID_Carpeta_Drive": CLIENTE_CARPETA_ID
         };
 
-        "ID_Carpeta_Drive": CLIENTE_CARPETA_ID
+        
 
         try {
             // 3. Petición POST
