@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Reportes de Visita</title>
+    <style>
+        /* Estilos CSS básicos para la presentación */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="date"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+        }
+        .actividades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .actividad-item {
+            display: flex;
+            align-items: center;
+        }
+        .actividad-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .status-message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📝 Reporte de Visitas</h1>
+    <form id="reporteForm">
+        
+        <div>
+            <label for="fechaVisita">Fecha de Visita:</label>
+            <input type="date" id="fechaVisita" required>
+        </div>
+
+        <div>
+            <label for="idProfesional">ID Profesional:</label>
+            <input type="text" id="idProfesional" required>
+        </div>
+
+        <div>
+            <label for="idEstablecimiento">Establecimiento:</label>
+            <select id="idEstablecimiento" required>
+                <option value="" disabled selected>Cargando establecimientos...</option>
+            </select>
+        </div>
+        
+        <label>Actividades Realizadas:</label>
+        <div id="actividadesContainer" class="actividades-grid">
+            <p>Cargando actividades...</p>
+        </div>
+
+        <div>
+            <label for="otrasTareas">Otras tareas realizadas:</label>
+            <textarea id="otrasTareas" rows="3"></textarea>
+        </div>
+
+        <div>
+            <label for="observaciones">Observaciones y recomendaciones realizadas:</label>
+            <textarea id="observaciones" rows="5"></textarea>
+        </div>
+
+        <button type="submit">Guardar Reporte</button>
+
+        <div id="statusMessage" class="status-message" style="display: none;"></div>
+        
+    </form>
+</div>
+
+<script>
+    // ⚙️ CONFIGURACIÓN: REEMPLAZA ESTA URL CON LA TUYA
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw6noiXFiMbctGbB99rW_1dlMsK7-0vMwUDRHUgvhzL3bWipdLz5-YkeluvoznpSGok/exec'; 
+    const form = document.getElementById('reporteForm');
+    const statusMessage = document.getElementById('statusMessage');
+
+    // --- FUNCIONES DE UTILIDAD ---
+
+    /**
+     * Muestra un mensaje de estado en la interfaz.
+     * @param {string} message Mensaje a mostrar.
+     * @param {boolean} isSuccess Si es verdadero, usa estilo de éxito.
+     */
+    function showStatus(message, isSuccess) {
+        statusMessage.textContent = message;
+        statusMessage.style.display = 'block';
+        statusMessage.className = 'status-message ' + (isSuccess ? 'status-success' : 'status-error');
+    }
+
+    /**
+     * Realiza una petición GET a la App Script.
+     * @param {string} action El parámetro 'action' para el endpoint.
+     * @returns {Promise<Object>} El objeto de respuesta JSON.
+     */
+    async function fetchData(action) {
+        const url = `${WEB_APP_URL}?action=${action}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Error de red: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error(`Error al obtener ${action}:`, error);
+            showStatus(`Error al cargar datos (${action}). Verifique la URL y el despliegue.`, false);
+            throw error; // Propagar el error para detener el flujo de carga
+        }
+    }
+
+    // --- FUNCIONES DE CARGA (GET) ---
+
+    async function cargarEstablecimientos() {
+        const select = document.getElementById('idEstablecimiento');
+        select.innerHTML = '<option value="" disabled selected>Cargando...</option>'; // Limpiar y poner cargando
+
+        const result = await fetchData('getEstablecimientos');
+        
+        select.innerHTML = ''; // Limpiar después de la carga
+        
+        if (result.success && result.data && result.data.length > 0) {
+            select.appendChild(new Option('Seleccione un establecimiento...', ''));
+            result.data.forEach(est => {
+                const option = new Option(`${est.Denominacion} (${est.Direccion})`, est.ID_Establecimiento);
+                select.appendChild(option);
+            });
+            select.selectedIndex = 0; // Seleccionar la opción de placeholder
+        } else {
+            select.innerHTML = '<option value="" disabled selected>No se encontraron establecimientos.</option>';
+        }
+    }
+
+    async function cargarActividades() {
+        const container = document.getElementById('actividadesContainer');
+        container.innerHTML = '<p>Cargando actividades...</p>';
+        
+        const result = await fetchData('getActividades');
+
+        container.innerHTML = ''; // Limpiar después de la carga
+
+        if (result.success && result.data && result.data.length > 0) {
+            result.data.forEach(act => {
+                const item = document.createElement('div');
+                item.className = 'actividad-item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = act.ID_Actividades;
+                checkbox.name = 'actividad';
+                checkbox.value = act.ID_Actividades;
+
+                const label = document.createElement('label');
+                label.htmlFor = act.ID_Actividades;
+                label.textContent = act.Descripcion;
+                
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                container.appendChild(item);
+            });
+        } else {
+            container.innerHTML = '<p>No se encontraron actividades.</p>';
+        }
+    }
+
+    // --- FUNCIÓN DE ENVÍO (POST) ---
+
+    async function enviarReporte(e) {
+        e.preventDefault(); // Evita el envío tradicional del formulario
+        showStatus('Enviando reporte...', false); 
+
+        // 1. Recolección de Checkboxes
+        const checkboxes = document.querySelectorAll('#actividadesContainer input[type="checkbox"]:checked');
+        const actividadesSeleccionadas = Array.from(checkboxes).map(cb => cb.value);
+
+        // 2. Construcción del JSON
+        const datosDelReporte = {
+            "Fecha de Visita": document.getElementById('fechaVisita').value,
+            "ID_Establecimiento": parseInt(document.getElementById('idEstablecimiento').value), // Asegurar que sea número
+            "ID_Profesional": document.getElementById('idProfesional').value,
+            "Otras tareas realizadas": document.getElementById('otrasTareas').value,
+            "Observaciones y recomendaciones realizadas": document.getElementById('observaciones').value,
+            "actividades": actividadesSeleccionadas // Array de IDs de las actividades marcadas
+        };
+
+        try {
+            // 3. Petición POST
+            const respuesta = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify(datosDelReporte) 
+            });
+
+            if (!respuesta.ok) {
+                throw new Error(`Error HTTP: ${respuesta.status}`);
+            }
+
+            const resultado = await respuesta.json();
+
+            // 4. Manejar el resultado
+            if (resultado.success) {
+                showStatus(`✅ Reporte guardado. Nuevo ID: ${resultado.ID_Reporte}`, true);
+                form.reset(); // Limpiar el formulario
+                // Recargar listas si es necesario, pero no es crucial aquí
+            } else {
+                showStatus(`❌ Fallo al guardar: ${resultado.message}`, false);
+            }
+
+        } catch (error) {
+            showStatus(`Hubo un error de conexión o procesamiento: ${error.message}`, false);
+            console.error("Error al enviar el reporte:", error);
+        }
+    }
+
+    // --- INICIALIZACIÓN ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Ejecutar las llamadas GET al cargar la página
+        cargarEstablecimientos();
+        cargarActividades();
+        
+        // Asignar la función de envío al evento submit del formulario
+        form.addEventListener('submit', enviarReporte);
+    });
+</script>
+
+</body>
+</html>
