@@ -163,25 +163,26 @@
 
     /**
      * Realiza una petición GET a la App Script.
-     * @param {string} actionUrl La URL completa con parámetros 'action' y 'ID_Cliente'.
+     * @param {string} actionUrl La URL de acción (ej: 'getClientes') o la URL con filtro (ej: 'getEstablecimientos&ID_Cliente=1').
      * @returns {Promise<Object>} El objeto de respuesta JSON.
      */
     async function fetchData(actionUrl) {
         try {
-            const url = `${WEB_APP_URL}?action=${actionUrl}`; 
+            // Si la actionUrl ya contiene '&', asumimos que es una URL completa con filtro.
+            // Si no, asumimos que solo contiene la acción.
+            const separator = actionUrl.includes('&') ? '' : '?action=';
+            const url = `${WEB_APP_URL}${separator}${actionUrl}`; 
             
-            console.log(`[CLIENTE] Llamando a: ${url}`); // Registro de la URL que se usa
+            console.log(`[CLIENTE] Llamando a: ${url}`); 
 
             const response = await fetch(url);
             
             console.log(`[CLIENTE] Respuesta HTTP recibida: ${response.status} - OK: ${response.ok}`);
 
             if (!response.ok) {
-                // Si el error no es 200, lanzamos la excepción
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            // Convertir la respuesta a JSON
             const data = await response.json(); 
             
             console.log(`[CLIENTE] Datos recibidos de ${actionUrl}:`, data);
@@ -197,12 +198,13 @@
     // --- FUNCIONES DE CARGA (GET) ---
     
     /**
-     * Nueva función: Carga la lista de clientes en el selector 'idCliente'.
+     * Carga la lista de clientes en el selector 'idCliente'.
      */
     async function cargarClientes() {
         const selector = document.getElementById('idCliente');
         selector.innerHTML = '<option value="" disabled selected>Cargando clientes...</option>'; 
 
+        // Acción: getClientes
         const result = await fetchData('getClientes'); 
         selector.innerHTML = ''; 
         
@@ -210,17 +212,16 @@
             selector.appendChild(new Option('Seleccione un cliente...', '', '', true));
             
             result.data.forEach(cliente => {
-                // Guardamos el ID_Cliente como value y el Nombre de la Empresa como texto
                 const option = new Option(cliente.Nombre_Empresa, cliente.ID_Cliente);
                 selector.appendChild(option);
             });
 
             // CLAVE: Escuchador de Eventos para el cambio de cliente
-            selector.addEventListener('change', (event) => {
+            selector.onchange = (event) => {
                 const selectedId = event.target.value;
                 // Al seleccionar un cliente, se cargan los establecimientos.
                 cargarEstablecimientos(selectedId); 
-            });
+            };
             
         } else {
             selector.innerHTML = '<option value="" disabled selected>No se encontraron clientes.</option>';
@@ -229,12 +230,13 @@
 
     /**
      * Modificada: Carga la lista de establecimientos, ahora filtrada por ID_Cliente.
+     * Requiere que el backend implemente el filtro en doGet/getEstablecimientos.
      */
     async function cargarEstablecimientos(ID_Cliente_Filtro = null) {
         const selector = document.getElementById('idEstablecimiento');
-        // Limpiamos y deshabilitamos mientras cargamos o si no hay filtro
         selector.innerHTML = ''; 
         selector.disabled = true;
+        CLIENTE_CARPETA_ID = null; // Resetear ID de carpeta al cambiar de cliente
 
         if (!ID_Cliente_Filtro) {
             selector.innerHTML = '<option value="" disabled selected>Seleccione primero un cliente...</option>';
@@ -243,7 +245,7 @@
 
         selector.innerHTML = '<option value="" disabled selected>Cargando establecimientos...</option>';
         
-        // Creamos la URL de acción con el filtro
+        // Creamos la URL de acción con el filtro: action=getEstablecimientos&ID_Cliente=X
         const actionUrl = `getEstablecimientos&ID_Cliente=${ID_Cliente_Filtro}`;
 
         const result = await fetchData(actionUrl); 
@@ -252,7 +254,7 @@
 
         if (result.success && result.data && result.data.length > 0) {
             
-            ESTABLECIMIENTOS_DATA = result.data; // Guardamos los datos para usar el ID de carpeta después
+            ESTABLECIMIENTOS_DATA = result.data; 
             
             selector.appendChild(new Option('Seleccione un establecimiento...', '', '', true));
             
@@ -262,27 +264,23 @@
                 selector.appendChild(option);
             });
             
-            // Habilitar el dropdown de Establecimientos
             selector.disabled = false;
 
-            // Aseguramos que el listener de 'change' esté en el selector de Establecimiento
-            // Nota: Se debe remover el listener anterior antes de añadir uno nuevo si se llama varias veces,
-            // pero para esta prueba simple, lo sobreescribimos.
-
+            // Listener para el cambio de establecimiento: Actualiza CLIENTE_CARPETA_ID
             selector.onchange = (event) => {
                 const selectedId = event.target.value;
                 
                 // Buscar el objeto completo (que incluye ID_Carpeta_Drive)
+                // Se usa String() para asegurar la comparación entre ID del option y ID del dato
                 const establecimientoSeleccionado = ESTABLECIMIENTOS_DATA.find(e => String(e.ID_Establecimiento) === selectedId);
                 
                 if (establecimientoSeleccionado) {
-                    // GUARDAR EL ID DE CARPETA en la variable global
                     CLIENTE_CARPETA_ID = establecimientoSeleccionado.ID_Carpeta_Drive; 
                 } else {
                     CLIENTE_CARPETA_ID = null;
                 }
                 
-                console.log("ID de Carpeta Guardado:", CLIENTE_CARPETA_ID); // Para depurar
+                console.log("ID de Carpeta Guardado:", CLIENTE_CARPETA_ID); 
             };
             
         } else {
@@ -326,7 +324,7 @@
     // --- FUNCIÓN DE ENVÍO (POST) ---
 
     async function enviarReporte(e) {
-        e.preventDefault(); // Evita el envío tradicional del formulario
+        e.preventDefault(); 
         showStatus('Enviando reporte...', false); 
 
         // 1. Recolección de Checkboxes
@@ -335,15 +333,12 @@
 
         // 2. Construcción del JSON
         const datosDelReporte = {
-            // NOTA: El campo "Fecha de Visita" usa la clave del backend, no la del ID HTML.
             "Fecha de Visita": document.getElementById('fechaVisita').value, 
-            "ID_Establecimiento": document.getElementById('idEstablecimiento').value, // El valor es el ID del Establecimiento
+            "ID_Establecimiento": document.getElementById('idEstablecimiento').value, 
             "ID_Profesional": document.getElementById('idProfesional').value,
             "Otras tareas realizadas": document.getElementById('otrasTareas').value,
             "Observaciones y recomendaciones realizadas": document.getElementById('observaciones').value,
-            "actividades": actividadesSeleccionadas, // Array de IDs de las actividades marcadas
-            
-            // 🛑 El backend usa su propia búsqueda, pero lo mandamos por consistencia
+            "actividades": actividadesSeleccionadas, 
             "ID_Carpeta_Drive": CLIENTE_CARPETA_ID 
         };
 
@@ -367,9 +362,8 @@
 
             // 4. Manejar el resultado
             if (resultado.success) {
-                // NOTA: El ID_Reporte se genera en el backend, revisa si tu doPost lo devuelve.
                 showStatus(`✅ Reporte guardado.`, true); 
-                form.reset(); // Limpiar el formulario
+                form.reset(); 
             } else {
                 showStatus(`❌ Fallo al guardar: ${resultado.message}`, false);
             }
@@ -382,11 +376,10 @@
 
     // --- INICIALIZACIÓN ---
     document.addEventListener('DOMContentLoaded', () => {
-        // 1. Ejecutar las llamadas GET al cargar la página: Cargar Clientes primero.
+        // Cargar Clientes primero (inicia la cascada)
         cargarClientes(); 
         cargarActividades();
         
-        // 2. Asignar la función de envío al evento submit del formulario
         form.addEventListener('submit', enviarReporte);
     });
 </script>
