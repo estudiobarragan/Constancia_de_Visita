@@ -1,336 +1,394 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Reportes de Visita</title>
-    <style>
-        /* Estilos CSS básicos para la presentación */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        .container {
-            max-width: 900px;
-            margin: auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #007bff;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-        input[type="text"], input[type="date"], select, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        textarea {
-            resize: vertical;
-        }
-        .actividades-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .actividad-item {
-            display: flex;
-            align-items: center;
-        }
-        .actividad-item input[type="checkbox"] {
-            width: auto;
-            margin-right: 8px;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 20px;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        .status-message {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .status-success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status-error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Reportes de Visita</title>
+    <style>
+        /* Estilos CSS básicos para la presentación */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="date"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+        }
+        .actividades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .actividad-item {
+            display: flex;
+            align-items: center;
+        }
+        .actividad-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .status-message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📝 Reporte de Visitas</h1>
-    <form id="reporteForm">
-        
-        <div>
-            <label for="fechaVisita">Fecha de Visita:</label>
-            <input type="date" id="fechaVisita" required>
-        </div>
+    <h1>📝 Reporte de Visitas</h1>
+    <form id="reporteForm">
+        
+        <div>
+            <label for="fechaVisita">Fecha de Visita:</label>
+            <input type="date" id="fechaVisita" required>
+        </div>
+
+        <div>
+            <label for="idProfesional">ID Profesional:</label>
+            <input type="text" id="idProfesional" required>
+        </div>
 
         <div>
-            <label for="idProfesional">ID Profesional:</label>
-            <input type="text" id="idProfesional" required>
+            <label for="idCliente">Cliente:</label>
+            <select id="idCliente" required>
+                <option value="" disabled selected>Cargando clientes...</option>
+            </select>
         </div>
 
         <div>
             <label for="idEstablecimiento">Establecimiento:</label>
-            <select id="idEstablecimiento" required>
-                <option value="" disabled selected>Cargando establecimientos...</option>
+            <select id="idEstablecimiento" required disabled>
+                <option value="" disabled selected>Seleccione primero un cliente...</option>
             </select>
         </div>
-        
-        <label>Actividades Realizadas:</label>
-        <div id="actividadesContainer" class="actividades-grid">
-            <p>Cargando actividades...</p>
-        </div>
+        
+        <label>Actividades Realizadas:</label>
+        <div id="actividadesContainer" class="actividades-grid">
+            <p>Cargando actividades...</p>
+        </div>
 
-        <div>
-            <label for="otrasTareas">Otras tareas realizadas:</label>
-            <textarea id="otrasTareas" rows="3"></textarea>
-        </div>
+        <div>
+            <label for="otrasTareas">Otras tareas realizadas:</label>
+            <textarea id="otrasTareas" rows="3"></textarea>
+        </div>
 
-        <div>
-            <label for="observaciones">Observaciones y recomendaciones realizadas:</label>
-            <textarea id="observaciones" rows="5"></textarea>
-        </div>
+        <div>
+            <label for="observaciones">Observaciones y recomendaciones realizadas:</label>
+            <textarea id="observaciones" rows="5"></textarea>
+        </div>
 
-        <button type="submit">Guardar Reporte</button>
+        <button type="submit">Guardar Reporte</button>
 
-        <div id="statusMessage" class="status-message" style="display: none;"></div>
-        
-    </form>
+        <div id="statusMessage" class="status-message" style="display: none;"></div>
+        
+    </form>
 </div>
 
 <script>
-    // ⚙️ CONFIGURACIÓN: REEMPLAZA ESTA URL CON LA TUYA
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw6noiXFiMbctGbB99rW_1dlMsK7-0vMwUDRHUgvhzL3bWipdLz5-YkeluvoznpSGok/exec'; 
-    const form = document.getElementById('reporteForm');
-    const statusMessage = document.getElementById('statusMessage');
-    let CLIENTE_CARPETA_ID = null;
+    // ⚙️ CONFIGURACIÓN: REEMPLAZA ESTA URL CON LA TUYA
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw6noiXFiMbctGbB99rW_1dlMsK7-0vMwUDRHUgvhzL3bWipdLz5-YkeluvoznpSGok/exec'; 
+    const form = document.getElementById('reporteForm');
+    const statusMessage = document.getElementById('statusMessage');
+    let CLIENTE_CARPETA_ID = null;
+    let ESTABLECIMIENTOS_DATA = []; // Almacena los datos del establecimiento actual
 
-    // --- FUNCIONES DE UTILIDAD ---
+    // --- FUNCIONES DE UTILIDAD ---
 
+    /**
+     * Muestra un mensaje de estado en la interfaz.
+     * @param {string} message Mensaje a mostrar.
+     * @param {boolean} isSuccess Si es verdadero, usa estilo de éxito.
+     */
+    function showStatus(message, isSuccess) {
+        statusMessage.textContent = message;
+        statusMessage.style.display = 'block';
+        statusMessage.className = 'status-message ' + (isSuccess ? 'status-success' : 'status-error');
+    }
+
+    /**
+     * Realiza una petición GET a la App Script.
+     * @param {string} actionUrl La URL completa con parámetros 'action' y 'ID_Cliente'.
+     * @returns {Promise<Object>} El objeto de respuesta JSON.
+     */
+    async function fetchData(actionUrl) {
+        try {
+            const url = `${WEB_APP_URL}?action=${actionUrl}`; 
+            
+            console.log(`[CLIENTE] Llamando a: ${url}`); // Registro de la URL que se usa
+
+            const response = await fetch(url);
+            
+            console.log(`[CLIENTE] Respuesta HTTP recibida: ${response.status} - OK: ${response.ok}`);
+
+            if (!response.ok) {
+                // Si el error no es 200, lanzamos la excepción
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Convertir la respuesta a JSON
+            const data = await response.json(); 
+            
+            console.log(`[CLIENTE] Datos recibidos de ${actionUrl}:`, data);
+            
+            return data; 
+            
+        } catch (error) {
+            console.error(`[CLIENTE] Error en fetchData para acción ${actionUrl}:`, error);
+            return { success: false, message: 'Error de red o servidor: ' + error.message };
+        }
+    }
+
+    // --- FUNCIONES DE CARGA (GET) ---
+    
     /**
-     * Muestra un mensaje de estado en la interfaz.
-     * @param {string} message Mensaje a mostrar.
-     * @param {boolean} isSuccess Si es verdadero, usa estilo de éxito.
+     * Nueva función: Carga la lista de clientes en el selector 'idCliente'.
      */
-    function showStatus(message, isSuccess) {
-        statusMessage.textContent = message;
-        statusMessage.style.display = 'block';
-        statusMessage.className = 'status-message ' + (isSuccess ? 'status-success' : 'status-error');
-    }
+    async function cargarClientes() {
+        const selector = document.getElementById('idCliente');
+        selector.innerHTML = '<option value="" disabled selected>Cargando clientes...</option>'; 
 
-    /**
-     * Realiza una petición GET a la App Script.
-     * @param {string} action El parámetro 'action' para el endpoint.
-     * @returns {Promise<Object>} El objeto de respuesta JSON.
-     */
-    async function fetchData(action) {
-        try {
-            const url = `${WEB_APP_URL}?action=${action}`; 
+        const result = await fetchData('getClientes'); 
+        selector.innerHTML = ''; 
+        
+        if (result.success && result.data && result.data.length > 0) {
+            selector.appendChild(new Option('Seleccione un cliente...', '', '', true));
             
-            console.log(`[CLIENTE] Llamando a: ${url}`); // Registro de la URL que se usa
+            result.data.forEach(cliente => {
+                // Guardamos el ID_Cliente como value y el Nombre de la Empresa como texto
+                const option = new Option(cliente.Nombre_Empresa, cliente.ID_Cliente);
+                selector.appendChild(option);
+            });
 
-            const response = await fetch(url);
+            // CLAVE: Escuchador de Eventos para el cambio de cliente
+            selector.addEventListener('change', (event) => {
+                const selectedId = event.target.value;
+                // Al seleccionar un cliente, se cargan los establecimientos.
+                cargarEstablecimientos(selectedId); 
+            });
             
-            // Registro de la respuesta HTTP
-            console.log(`[CLIENTE] Respuesta HTTP recibida: ${response.status} - OK: ${response.ok}`);
-
-            if (!response.ok) {
-                // Si el error no es 200, lanzamos la excepción
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            // Convertir la respuesta a JSON
-            const data = await response.json(); 
-            
-            // Registro de los datos JSON recibidos
-            console.log(`[CLIENTE] Datos recibidos de ${action}:`, data);
-            
-            return data; 
-            
-        } catch (error) {
-            console.error(`[CLIENTE] Error en fetchData para acción ${action}:`, error);
-            return { success: false, message: 'Error de red o servidor: ' + error.message };
+        } else {
+            selector.innerHTML = '<option value="" disabled selected>No se encontraron clientes.</option>';
         }
     }
 
-    // --- FUNCIONES DE CARGA (GET) ---
+    /**
+     * Modificada: Carga la lista de establecimientos, ahora filtrada por ID_Cliente.
+     */
+    async function cargarEstablecimientos(ID_Cliente_Filtro = null) {
+        const selector = document.getElementById('idEstablecimiento');
+        // Limpiamos y deshabilitamos mientras cargamos o si no hay filtro
+        selector.innerHTML = ''; 
+        selector.disabled = true;
 
-    // CÓDIGO DENTRO DE index.html
-// Asegúrate de que la variable CLIENTE_CARPETA_ID esté declarada como global:
-// let CLIENTE_CARPETA_ID = null; 
+        if (!ID_Cliente_Filtro) {
+            selector.innerHTML = '<option value="" disabled selected>Seleccione primero un cliente...</option>';
+            return;
+        }
 
-async function cargarEstablecimientos() {
-    const selector = document.getElementById('idEstablecimiento');
-    
-    selector.innerHTML = '<option value="" disabled selected>Cargando ...</option>'; 
-
-    const result = await fetchData('getEstablecimientos'); 
-
-    selector.innerHTML = ''; 
-
-    if (result.success && result.data && result.data.length > 0) {
+        selector.innerHTML = '<option value="" disabled selected>Cargando establecimientos...</option>';
         
-            // Almacenamos los datos para el evento 'change'
-            const establecimientos = result.data; 
+        // Creamos la URL de acción con el filtro
+        const actionUrl = `getEstablecimientos&ID_Cliente=${ID_Cliente_Filtro}`;
+
+        const result = await fetchData(actionUrl); 
+
+        selector.innerHTML = ''; // Limpiar antes de rellenar
+
+        if (result.success && result.data && result.data.length > 0) {
+            
+            ESTABLECIMIENTOS_DATA = result.data; // Guardamos los datos para usar el ID de carpeta después
             
             selector.appendChild(new Option('Seleccione un establecimiento...', '', '', true));
             
             // Rellenar el selector
-            establecimientos.forEach(est => {
+            ESTABLECIMIENTOS_DATA.forEach(est => {
                 const option = new Option(`${est.Denominacion} (${est.Direccion})`, est.ID_Establecimiento);
                 selector.appendChild(option);
             });
+            
+            // Habilitar el dropdown de Establecimientos
+            selector.disabled = false;
 
-            // CLAVE: Agregar el Escuchador de Eventos para guardar el ID de Carpeta
-            selector.addEventListener('change', (event) => {
+            // Aseguramos que el listener de 'change' esté en el selector de Establecimiento
+            // Nota: Se debe remover el listener anterior antes de añadir uno nuevo si se llama varias veces,
+            // pero para esta prueba simple, lo sobreescribimos.
+
+            selector.onchange = (event) => {
                 const selectedId = event.target.value;
                 
                 // Buscar el objeto completo (que incluye ID_Carpeta_Drive)
-                const clienteSeleccionado = establecimientos.find(e => e.ID_Establecimiento === selectedId);
+                const establecimientoSeleccionado = ESTABLECIMIENTOS_DATA.find(e => String(e.ID_Establecimiento) === selectedId);
                 
-                if (clienteSeleccionado) {
+                if (establecimientoSeleccionado) {
                     // GUARDAR EL ID DE CARPETA en la variable global
-                    CLIENTE_CARPETA_ID = clienteSeleccionado.ID_Carpeta_Drive; 
+                    CLIENTE_CARPETA_ID = establecimientoSeleccionado.ID_Carpeta_Drive; 
                 } else {
                     CLIENTE_CARPETA_ID = null;
                 }
                 
                 console.log("ID de Carpeta Guardado:", CLIENTE_CARPETA_ID); // Para depurar
-            });
-        
+            };
+            
         } else {
-            selector.innerHTML = '<option value="" disabled selected>No se encontraron establecimientos.</option>';
+            selector.innerHTML = '<option value="" disabled selected>No se encontraron establecimientos para este cliente.</option>';
         }
     }
 
-    async function cargarActividades() {
-        const container = document.getElementById('actividadesContainer');
-        container.innerHTML = '<p>Cargando actividades...</p>';
-        
-        const result = await fetchData('getActividades');
 
-        container.innerHTML = ''; // Limpiar después de la carga
+    async function cargarActividades() {
+        const container = document.getElementById('actividadesContainer');
+        container.innerHTML = '<p>Cargando actividades...</p>';
+        
+        const result = await fetchData('getActividades');
 
-        if (result.success && result.data && result.data.length > 0) {
-            result.data.forEach(act => {
-                const item = document.createElement('div');
-                item.className = 'actividad-item';
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = act.ID_Actividades;
-                checkbox.name = 'actividad';
-                checkbox.value = act.ID_Actividades;
+        container.innerHTML = ''; // Limpiar después de la carga
 
-                const label = document.createElement('label');
-                label.htmlFor = act.ID_Actividades;
-                label.textContent = act.Descripcion;
-                
-                item.appendChild(checkbox);
-                item.appendChild(label);
-                container.appendChild(item);
-            });
-        } else {
-            container.innerHTML = '<p>No se encontraron actividades.</p>';
+        if (result.success && result.data && result.data.length > 0) {
+            result.data.forEach(act => {
+                const item = document.createElement('div');
+                item.className = 'actividad-item';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = act.ID_Actividades;
+                checkbox.name = 'actividad';
+                checkbox.value = act.ID_Actividades;
+
+                const label = document.createElement('label');
+                label.htmlFor = act.ID_Actividades;
+                label.textContent = act.Descripcion;
+                
+                item.appendChild(checkbox);
+                item.appendChild(label);
+                container.appendChild(item);
+            });
+        } else {
+            container.innerHTML = '<p>No se encontraron actividades.</p>';
+        }
+    }
+
+    // --- FUNCIÓN DE ENVÍO (POST) ---
+
+    async function enviarReporte(e) {
+        e.preventDefault(); // Evita el envío tradicional del formulario
+        showStatus('Enviando reporte...', false); 
+
+        // 1. Recolección de Checkboxes
+        const checkboxes = document.querySelectorAll('#actividadesContainer input[type="checkbox"]:checked');
+        const actividadesSeleccionadas = Array.from(checkboxes).map(cb => cb.value);
+
+        // 2. Construcción del JSON
+        const datosDelReporte = {
+            // NOTA: El campo "Fecha de Visita" usa la clave del backend, no la del ID HTML.
+            "Fecha de Visita": document.getElementById('fechaVisita').value, 
+            "ID_Establecimiento": document.getElementById('idEstablecimiento').value, // El valor es el ID del Establecimiento
+            "ID_Profesional": document.getElementById('idProfesional').value,
+            "Otras tareas realizadas": document.getElementById('otrasTareas').value,
+            "Observaciones y recomendaciones realizadas": document.getElementById('observaciones').value,
+            "actividades": actividadesSeleccionadas, // Array de IDs de las actividades marcadas
+            
+            // 🛑 El backend usa su propia búsqueda, pero lo mandamos por consistencia
+            "ID_Carpeta_Drive": CLIENTE_CARPETA_ID 
+        };
+
+        if (!datosDelReporte.ID_Establecimiento) {
+             showStatus("❌ Por favor, seleccione un Establecimiento válido.", false);
+             return;
         }
-    }
 
-    // --- FUNCIÓN DE ENVÍO (POST) ---
+        try {
+            // 3. Petición POST
+            const respuesta = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify(datosDelReporte) 
+            });
 
-    async function enviarReporte(e) {
-        e.preventDefault(); // Evita el envío tradicional del formulario
-        showStatus('Enviando reporte...', false); 
+            if (!respuesta.ok) {
+                throw new Error(`Error HTTP: ${respuesta.status}`);
+            }
 
-        // 1. Recolección de Checkboxes
-        const checkboxes = document.querySelectorAll('#actividadesContainer input[type="checkbox"]:checked');
-        const actividadesSeleccionadas = Array.from(checkboxes).map(cb => cb.value);
+            const resultado = await respuesta.json();
 
-        // 2. Construcción del JSON
-        const datosDelReporte = {
-            "Fecha de Visita": document.getElementById('fechaVisita').value,
-            "ID_Establecimiento": parseInt(document.getElementById('idEstablecimiento').value),
-            "ID_Profesional": document.getElementById('idProfesional').value,
-            "Otras tareas realizadas": document.getElementById('otrasTareas').value,
-            "Observaciones y recomendaciones realizadas": document.getElementById('observaciones').value,
-            "actividades": actividadesSeleccionadas, // Array de IDs de las actividades marcadas
-            // CLAVE CORREGIDA: Agregamos ID_Carpeta_Drive dentro del objeto y sin comillas extra.
-            "ID_Carpeta_Drive": CLIENTE_CARPETA_ID
-        };
+            // 4. Manejar el resultado
+            if (resultado.success) {
+                // NOTA: El ID_Reporte se genera en el backend, revisa si tu doPost lo devuelve.
+                showStatus(`✅ Reporte guardado.`, true); 
+                form.reset(); // Limpiar el formulario
+            } else {
+                showStatus(`❌ Fallo al guardar: ${resultado.message}`, false);
+            }
 
-        
+        } catch (error) {
+            showStatus(`Hubo un error de conexión o procesamiento: ${error.message}`, false);
+            console.error("Error al enviar el reporte:", error);
+        }
+    }
 
-        try {
-            // 3. Petición POST
-            const respuesta = await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify(datosDelReporte) 
-            });
-
-            if (!respuesta.ok) {
-                throw new Error(`Error HTTP: ${respuesta.status}`);
-            }
-
-            const resultado = await respuesta.json();
-
-            // 4. Manejar el resultado
-            if (resultado.success) {
-                showStatus(`✅ Reporte guardado. Nuevo ID: ${resultado.ID_Reporte}`, true);
-                form.reset(); // Limpiar el formulario
-                // Recargar listas si es necesario, pero no es crucial aquí
-            } else {
-                showStatus(`❌ Fallo al guardar: ${resultado.message}`, false);
-            }
-
-        } catch (error) {
-            showStatus(`Hubo un error de conexión o procesamiento: ${error.message}`, false);
-            console.error("Error al enviar el reporte:", error);
-        }
-    }
-
-    // --- INICIALIZACIÓN ---
-    document.addEventListener('DOMContentLoaded', () => {
-        // Ejecutar las llamadas GET al cargar la página
-        cargarEstablecimientos();
-        cargarActividades();
-        
-        // Asignar la función de envío al evento submit del formulario
-        form.addEventListener('submit', enviarReporte);
-    });
+    // --- INICIALIZACIÓN ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Ejecutar las llamadas GET al cargar la página: Cargar Clientes primero.
+        cargarClientes(); 
+        cargarActividades();
+        
+        // 2. Asignar la función de envío al evento submit del formulario
+        form.addEventListener('submit', enviarReporte);
+    });
 </script>
 
 </body>
