@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Reportes de Visita</title>
     <style>
-        /* Estilos CSS básicos para la presentación */
+        /* Estilos CSS restaurados para la presentación */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -168,8 +168,6 @@
      */
     async function fetchData(actionUrl) {
         try {
-            // Si la actionUrl ya contiene '&', asumimos que es una URL completa con filtro.
-            // Si no, asumimos que solo contiene la acción.
             const separator = actionUrl.includes('&') ? '' : '?action=';
             const url = `${WEB_APP_URL}${separator}${actionUrl}`; 
             
@@ -199,12 +197,12 @@
     
     /**
      * Carga la lista de clientes en el selector 'idCliente'.
+     * Requiere la función getClientes en el backend.
      */
     async function cargarClientes() {
         const selector = document.getElementById('idCliente');
         selector.innerHTML = '<option value="" disabled selected>Cargando clientes...</option>'; 
 
-        // Acción: getClientes
         const result = await fetchData('getClientes'); 
         selector.innerHTML = ''; 
         
@@ -236,7 +234,7 @@
         const selector = document.getElementById('idEstablecimiento');
         selector.innerHTML = ''; 
         selector.disabled = true;
-        CLIENTE_CARPETA_ID = null; // Resetear ID de carpeta al cambiar de cliente
+        CLIENTE_CARPETA_ID = null; 
 
         if (!ID_Cliente_Filtro) {
             selector.innerHTML = '<option value="" disabled selected>Seleccione primero un cliente...</option>';
@@ -250,7 +248,7 @@
 
         const result = await fetchData(actionUrl); 
 
-        selector.innerHTML = ''; // Limpiar antes de rellenar
+        selector.innerHTML = ''; 
 
         if (result.success && result.data && result.data.length > 0) {
             
@@ -270,8 +268,6 @@
             selector.onchange = (event) => {
                 const selectedId = event.target.value;
                 
-                // Buscar el objeto completo (que incluye ID_Carpeta_Drive)
-                // Se usa String() para asegurar la comparación entre ID del option y ID del dato
                 const establecimientoSeleccionado = ESTABLECIMIENTOS_DATA.find(e => String(e.ID_Establecimiento) === selectedId);
                 
                 if (establecimientoSeleccionado) {
@@ -295,7 +291,7 @@
         
         const result = await fetchData('getActividades');
 
-        container.innerHTML = ''; // Limpiar después de la carga
+        container.innerHTML = ''; 
 
         if (result.success && result.data && result.data.length > 0) {
             result.data.forEach(act => {
