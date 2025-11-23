@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulario de Reportes de Visita</title>
     <style>
-        /* Estilos CSS restaurados para la presentación */
+        /* Estilos CSS que dan el formato estético */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            background-color: #f4f4f9;
+            background-color: #f4f4f9; /* Fondo gris claro */
             color: #333;
         }
         .container {
             max-width: 900px;
             margin: auto;
-            background: #fff;
+            background: #fff; /* Recuadro blanco */
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -146,44 +146,27 @@
     const form = document.getElementById('reporteForm');
     const statusMessage = document.getElementById('statusMessage');
     let CLIENTE_CARPETA_ID = null;
-    let ESTABLECIMIENTOS_DATA = []; // Almacena los datos del establecimiento actual
+    let ESTABLECIMIENTOS_DATA = [];
 
     // --- FUNCIONES DE UTILIDAD ---
-
-    /**
-     * Muestra un mensaje de estado en la interfaz.
-     * @param {string} message Mensaje a mostrar.
-     * @param {boolean} isSuccess Si es verdadero, usa estilo de éxito.
-     */
     function showStatus(message, isSuccess) {
         statusMessage.textContent = message;
         statusMessage.style.display = 'block';
         statusMessage.className = 'status-message ' + (isSuccess ? 'status-success' : 'status-error');
     }
 
-    /**
-     * Realiza una petición GET a la App Script.
-     * @param {string} actionUrl La URL de acción (ej: 'getClientes') o la URL con filtro (ej: 'getEstablecimientos&ID_Cliente=1').
-     * @returns {Promise<Object>} El objeto de respuesta JSON.
-     */
     async function fetchData(actionUrl) {
         try {
             const separator = actionUrl.includes('&') ? '' : '?action=';
             const url = `${WEB_APP_URL}${separator}${actionUrl}`; 
             
-            console.log(`[CLIENTE] Llamando a: ${url}`); 
-
             const response = await fetch(url);
             
-            console.log(`[CLIENTE] Respuesta HTTP recibida: ${response.status} - OK: ${response.ok}`);
-
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json(); 
-            
-            console.log(`[CLIENTE] Datos recibidos de ${actionUrl}:`, data);
             
             return data; 
             
@@ -195,10 +178,6 @@
 
     // --- FUNCIONES DE CARGA (GET) ---
     
-    /**
-     * Carga la lista de clientes en el selector 'idCliente'.
-     * Requiere la función getClientes en el backend.
-     */
     async function cargarClientes() {
         const selector = document.getElementById('idCliente');
         selector.innerHTML = '<option value="" disabled selected>Cargando clientes...</option>'; 
@@ -214,10 +193,8 @@
                 selector.appendChild(option);
             });
 
-            // CLAVE: Escuchador de Eventos para el cambio de cliente
             selector.onchange = (event) => {
                 const selectedId = event.target.value;
-                // Al seleccionar un cliente, se cargan los establecimientos.
                 cargarEstablecimientos(selectedId); 
             };
             
@@ -226,10 +203,6 @@
         }
     }
 
-    /**
-     * Modificada: Carga la lista de establecimientos, ahora filtrada por ID_Cliente.
-     * Requiere que el backend implemente el filtro en doGet/getEstablecimientos.
-     */
     async function cargarEstablecimientos(ID_Cliente_Filtro = null) {
         const selector = document.getElementById('idEstablecimiento');
         selector.innerHTML = ''; 
@@ -243,7 +216,6 @@
 
         selector.innerHTML = '<option value="" disabled selected>Cargando establecimientos...</option>';
         
-        // Creamos la URL de acción con el filtro: action=getEstablecimientos&ID_Cliente=X
         const actionUrl = `getEstablecimientos&ID_Cliente=${ID_Cliente_Filtro}`;
 
         const result = await fetchData(actionUrl); 
@@ -256,7 +228,6 @@
             
             selector.appendChild(new Option('Seleccione un establecimiento...', '', '', true));
             
-            // Rellenar el selector
             ESTABLECIMIENTOS_DATA.forEach(est => {
                 const option = new Option(`${est.Denominacion} (${est.Direccion})`, est.ID_Establecimiento);
                 selector.appendChild(option);
@@ -264,7 +235,6 @@
             
             selector.disabled = false;
 
-            // Listener para el cambio de establecimiento: Actualiza CLIENTE_CARPETA_ID
             selector.onchange = (event) => {
                 const selectedId = event.target.value;
                 
@@ -275,8 +245,6 @@
                 } else {
                     CLIENTE_CARPETA_ID = null;
                 }
-                
-                console.log("ID de Carpeta Guardado:", CLIENTE_CARPETA_ID); 
             };
             
         } else {
@@ -323,11 +291,9 @@
         e.preventDefault(); 
         showStatus('Enviando reporte...', false); 
 
-        // 1. Recolección de Checkboxes
         const checkboxes = document.querySelectorAll('#actividadesContainer input[type="checkbox"]:checked');
         const actividadesSeleccionadas = Array.from(checkboxes).map(cb => cb.value);
 
-        // 2. Construcción del JSON
         const datosDelReporte = {
             "Fecha de Visita": document.getElementById('fechaVisita').value, 
             "ID_Establecimiento": document.getElementById('idEstablecimiento').value, 
@@ -344,7 +310,6 @@
         }
 
         try {
-            // 3. Petición POST
             const respuesta = await fetch(WEB_APP_URL, {
                 method: 'POST',
                 body: JSON.stringify(datosDelReporte) 
@@ -356,7 +321,6 @@
 
             const resultado = await respuesta.json();
 
-            // 4. Manejar el resultado
             if (resultado.success) {
                 showStatus(`✅ Reporte guardado.`, true); 
                 form.reset(); 
@@ -366,13 +330,12 @@
 
         } catch (error) {
             showStatus(`Hubo un error de conexión o procesamiento: ${error.message}`, false);
-            console.error("Error al enviar el reporte:", error);
         }
     }
 
     // --- INICIALIZACIÓN ---
     document.addEventListener('DOMContentLoaded', () => {
-        // Cargar Clientes primero (inicia la cascada)
+        // Cargar Clientes (inicia la cascada)
         cargarClientes(); 
         cargarActividades();
         
