@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Reportes de Visita</title>
+    <title>Formulario de Reportes de Visita (SÓLO ESTILOS)</title>
     <style>
         /* Estilos CSS que dan el formato estético */
         body {
@@ -104,23 +104,26 @@
             <input type="text" id="idProfesional" required>
         </div>
 
-        <div>
-            <label for="idCliente">Cliente:</label>
-            <select id="idCliente" required>
-                <option value="" disabled selected>Cargando clientes...</option>
-            </select>
-        </div>
+        <div>
+            <label for="idCliente">Cliente:</label>
+            <select id="idCliente" required>
+                                <option value="" disabled selected>Cliente de Prueba</option>
+            </select>
+        </div>
 
-        <div>
-            <label for="idEstablecimiento">Establecimiento:</label>
-            <select id="idEstablecimiento" required disabled>
-                <option value="" disabled selected>Seleccione primero un cliente...</option>
-            </select>
-        </div>
+        <div>
+            <label for="idEstablecimiento">Establecimiento:</label>
+            <select id="idEstablecimiento" required>
+                                <option value="" disabled selected>Establecimiento de Prueba</option>
+            </select>
+        </div>
         
         <label>Actividades Realizadas:</label>
         <div id="actividadesContainer" class="actividades-grid">
-            <p>Cargando actividades...</p>
+                        <div class="actividad-item"><input type="checkbox" id="act1" name="actividad" value="1"><label for="act1">Asesorar en normativas de HyS vigentes</label></div>
+            <div class="actividad-item"><input type="checkbox" id="act2" name="actividad" value="2"><label for="act2">Definición y acuerdo plan preventivo anual</label></div>
+            <div class="actividad-item"><input type="checkbox" id="act3" name="actividad" value="3"><label for="act3">Seguimiento de planes preventivos vigentes</label></div>
+            <div class="actividad-item"><input type="checkbox" id="act4" name="actividad" value="4"><label for="act4">Capacitación</label></div>
         </div>
 
         <div>
@@ -141,206 +144,34 @@
 </div>
 
 <script>
-    // ⚙️ CONFIGURACIÓN: REEMPLAZA ESTA URL CON LA TUYA
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw6noiXFiMbctGbB99rW_1dlMsK7-0vMwUDRHUgvhzL3bWipdLz5-YkeluvoznpSGok/exec'; 
-    const form = document.getElementById('reporteForm');
-    const statusMessage = document.getElementById('statusMessage');
-    let CLIENTE_CARPETA_ID = null;
+    // ESTA SECCIÓN DE JAVASCRIPT HA SIDO COMENTADA PARA EVITAR CUALQUIER LLAMADA AL BACKEND.
+    
+    /* const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw6noiXFiMbctGbB99rW_1dlMsK7-0vMwUDRHUgvhzL3bWipdLz5-YkeluvoznpSGok/exec';
+    const form = document.getElementById('reporteForm');
+    const statusMessage = document.getElementById('statusMessage');
+    let CLIENTE_CARPETA_ID = null;
     let ESTABLECIMIENTOS_DATA = [];
 
-    // --- FUNCIONES DE UTILIDAD ---
-    function showStatus(message, isSuccess) {
-        statusMessage.textContent = message;
-        statusMessage.style.display = 'block';
-        statusMessage.className = 'status-message ' + (isSuccess ? 'status-success' : 'status-error');
-    }
-
-    async function fetchData(actionUrl) {
-        try {
-            const separator = actionUrl.includes('&') ? '' : '?action=';
-            const url = `${WEB_APP_URL}${separator}${actionUrl}`; 
-            
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json(); 
-            
-            return data; 
-            
-        } catch (error) {
-            console.error(`[CLIENTE] Error en fetchData para acción ${actionUrl}:`, error);
-            return { success: false, message: 'Error de red o servidor: ' + error.message };
-        }
-    }
-
-    // --- FUNCIONES DE CARGA (GET) ---
-    
-    async function cargarClientes() {
-        const selector = document.getElementById('idCliente');
-        selector.innerHTML = '<option value="" disabled selected>Cargando clientes...</option>'; 
-
-        const result = await fetchData('getClientes'); 
-        selector.innerHTML = ''; 
-        
-        if (result.success && result.data && result.data.length > 0) {
-            selector.appendChild(new Option('Seleccione un cliente...', '', '', true));
-            
-            result.data.forEach(cliente => {
-                const option = new Option(cliente.Nombre_Empresa, cliente.ID_Cliente);
-                selector.appendChild(option);
-            });
-
-            selector.onchange = (event) => {
-                const selectedId = event.target.value;
-                cargarEstablecimientos(selectedId); 
-            };
-            
-        } else {
-            selector.innerHTML = '<option value="" disabled selected>No se encontraron clientes.</option>';
-        }
+    // --- FUNCIONES DE UTILIDAD (No funcionales sin llamadas al backend) ---
+    function showStatus(message, isSuccess) {
+        statusMessage.textContent = message;
+        statusMessage.style.display = 'block';
+        statusMessage.className = 'status-message ' + (isSuccess ? 'status-success' : 'status-error');
     }
 
-    async function cargarEstablecimientos(ID_Cliente_Filtro = null) {
-        const selector = document.getElementById('idEstablecimiento');
-        selector.innerHTML = ''; 
-        selector.disabled = true;
-        CLIENTE_CARPETA_ID = null; 
+    // async function fetchData(actionUrl) { ... } // Función comentada
+    // async function cargarClientes() { ... } // Función comentada
+    // async function cargarEstablecimientos(ID_Cliente_Filtro = null) { ... } // Función comentada
+    // async function cargarActividades() { ... } // Función comentada
+    // async function enviarReporte(e) { ... } // Función comentada
 
-        if (!ID_Cliente_Filtro) {
-            selector.innerHTML = '<option value="" disabled selected>Seleccione primero un cliente...</option>';
-            return;
-        }
-
-        selector.innerHTML = '<option value="" disabled selected>Cargando establecimientos...</option>';
-        
-        const actionUrl = `getEstablecimientos&ID_Cliente=${ID_Cliente_Filtro}`;
-
-        const result = await fetchData(actionUrl); 
-
-        selector.innerHTML = ''; 
-
-        if (result.success && result.data && result.data.length > 0) {
-            
-            ESTABLECIMIENTOS_DATA = result.data; 
-            
-            selector.appendChild(new Option('Seleccione un establecimiento...', '', '', true));
-            
-            ESTABLECIMIENTOS_DATA.forEach(est => {
-                const option = new Option(`${est.Denominacion} (${est.Direccion})`, est.ID_Establecimiento);
-                selector.appendChild(option);
-            });
-            
-            selector.disabled = false;
-
-            selector.onchange = (event) => {
-                const selectedId = event.target.value;
-                
-                const establecimientoSeleccionado = ESTABLECIMIENTOS_DATA.find(e => String(e.ID_Establecimiento) === selectedId);
-                
-                if (establecimientoSeleccionado) {
-                    CLIENTE_CARPETA_ID = establecimientoSeleccionado.ID_Carpeta_Drive; 
-                } else {
-                    CLIENTE_CARPETA_ID = null;
-                }
-            };
-            
-        } else {
-            selector.innerHTML = '<option value="" disabled selected>No se encontraron establecimientos para este cliente.</option>';
-        }
-    }
-
-
-    async function cargarActividades() {
-        const container = document.getElementById('actividadesContainer');
-        container.innerHTML = '<p>Cargando actividades...</p>';
-        
-        const result = await fetchData('getActividades');
-
-        container.innerHTML = ''; 
-
-        if (result.success && result.data && result.data.length > 0) {
-            result.data.forEach(act => {
-                const item = document.createElement('div');
-                item.className = 'actividad-item';
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = act.ID_Actividades;
-                checkbox.name = 'actividad';
-                checkbox.value = act.ID_Actividades;
-
-                const label = document.createElement('label');
-                label.htmlFor = act.ID_Actividades;
-                label.textContent = act.Descripcion;
-                
-                item.appendChild(checkbox);
-                item.appendChild(label);
-                container.appendChild(item);
-            });
-        } else {
-            container.innerHTML = '<p>No se encontraron actividades.</p>';
-        }
-    }
-
-    // --- FUNCIÓN DE ENVÍO (POST) ---
-
-    async function enviarReporte(e) {
-        e.preventDefault(); 
-        showStatus('Enviando reporte...', false); 
-
-        const checkboxes = document.querySelectorAll('#actividadesContainer input[type="checkbox"]:checked');
-        const actividadesSeleccionadas = Array.from(checkboxes).map(cb => cb.value);
-
-        const datosDelReporte = {
-            "Fecha de Visita": document.getElementById('fechaVisita').value, 
-            "ID_Establecimiento": document.getElementById('idEstablecimiento').value, 
-            "ID_Profesional": document.getElementById('idProfesional').value,
-            "Otras tareas realizadas": document.getElementById('otrasTareas').value,
-            "Observaciones y recomendaciones realizadas": document.getElementById('observaciones').value,
-            "actividades": actividadesSeleccionadas, 
-            "ID_Carpeta_Drive": CLIENTE_CARPETA_ID 
-        };
-
-        if (!datosDelReporte.ID_Establecimiento) {
-             showStatus("❌ Por favor, seleccione un Establecimiento válido.", false);
-             return;
-        }
-
-        try {
-            const respuesta = await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify(datosDelReporte) 
-            });
-
-            if (!respuesta.ok) {
-                throw new Error(`Error HTTP: ${respuesta.status}`);
-            }
-
-            const resultado = await respuesta.json();
-
-            if (resultado.success) {
-                showStatus(`✅ Reporte guardado.`, true); 
-                form.reset(); 
-            } else {
-                showStatus(`❌ Fallo al guardar: ${resultado.message}`, false);
-            }
-
-        } catch (error) {
-            showStatus(`Hubo un error de conexión o procesamiento: ${error.message}`, false);
-        }
-    }
-
-    // --- INICIALIZACIÓN ---
-    document.addEventListener('DOMContentLoaded', () => {
-        // Cargar Clientes (inicia la cascada)
-        cargarClientes(); 
-        cargarActividades();
-        
-        form.addEventListener('submit', enviarReporte);
-    });
+    // --- INICIALIZACIÓN (Comentada para evitar llamadas) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // cargarClientes(); // Llamada comentada
+        // cargarActividades(); // Llamada comentada
+        // form.addEventListener('submit', enviarReporte); // Llamada comentada
+    });
+    */
 </script>
 
 </body>
